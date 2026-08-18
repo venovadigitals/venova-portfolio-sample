@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /admin-dashboard.html
 
 Sitemap: https://www.venovadigitals.com/sitemap.xml
