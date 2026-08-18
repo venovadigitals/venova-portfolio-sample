@@ -141,6 +141,12 @@ h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(24p
 .highlight-list{list-style:none;margin-top:8px;}
 .highlight-list li{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px 18px;font-size:14.5px;color:var(--navy);position:relative;padding-left:38px;box-shadow:0 2px 12px var(--shadow);margin-bottom:12px;line-height:1.6;}
 .highlight-list li::before{content:'✓';position:absolute;left:14px;top:16px;color:var(--blue);font-weight:700;}
+.process-list{list-style:none;margin-top:8px;counter-reset:step;}
+.process-list li{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px 18px 16px 54px;font-size:14.5px;color:var(--navy);position:relative;box-shadow:0 2px 12px var(--shadow);margin-bottom:12px;line-height:1.6;}
+.process-list li::before{counter-increment:step;content:counter(step);position:absolute;left:14px;top:14px;width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.process-list strong{display:block;font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.result-box{background:#fff;border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:8px;padding:22px 24px;box-shadow:0 2px 12px var(--shadow);}
+.result-box p{font-size:15.5px;line-height:1.7;color:var(--navy);}
 .cta-band{background:linear-gradient(135deg,var(--navy),#12203d);border-radius:16px;padding:44px 36px;text-align:center;color:#fff;}
 .cta-band h2{color:#fff;}
 .cta-band p{color:#b9c6dc;font-size:15.5px;margin-bottom:22px;}
@@ -166,6 +172,7 @@ footer{background:var(--navy);color:#b9c6dc;padding:50px 0 22px;margin-top:20px;
     <li><a href="/#about">About</a></li>
     <li><a href="/#services">Services</a></li>
     <li><a href="/#portfolio">Portfolio</a></li>
+    <li><a href="/blog.html">Blog</a></li>
     <li><a href="/#faq">FAQ</a></li>
     <li><a href="https://wa.me/919390238537" class="nav-cta">Get Free Consultation</a></li>
   </ul>
@@ -212,6 +219,25 @@ footer{background:var(--navy);color:#b9c6dc;padding:50px 0 22px;margin-top:20px;
   </section>
 
   <section>
+    <div class="section-label">Our Process</div>
+    <h2>How We Got There</h2>
+    <ul class="process-list">
+      <li><strong>Visual Audit</strong>Studied the existing Framer build page-by-page — colour values, spacing rhythm, font weights, and component patterns — before writing a single line of code.</li>
+      <li><strong>Component Matching</strong>Rebuilt the cream/peach gradient backgrounds, Playfair Display headings, and pastel stat-card components from scratch, matched closely to the original.</li>
+      <li><strong>Page Build</strong>Structured the new About page to follow the same layout conventions and content rhythm as the existing pages, so it reads as part of the same site rather than a bolt-on.</li>
+      <li><strong>Handover</strong>Labelled every illustration placeholder clearly, so the client's team could swap in final imagery later without touching layout or code.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-label">Outcome</div>
+    <h2>The Result</h2>
+    <div class="result-box">
+      <p>The new pages sit inside the existing site without a visible seam — visitors can't tell where the original Framer build ends and the newly built pages begin.</p>
+    </div>
+  </section>
+
+  <section>
     <div class="cta-band">
       <h2>Want Results Like This?</h2>
       <p>Tell us about your project and we'll get back to you with a free quote.</p>
@@ -234,6 +260,7 @@ footer{background:var(--navy);color:#b9c6dc;padding:50px 0 22px;margin-top:20px;
           <li><a href="/#about">About Us</a></li>
           <li><a href="/#services">Services</a></li>
           <li><a href="/#portfolio">Portfolio</a></li>
+          <li><a href="/blog.html">Blog</a></li>
           <li><a href="/#faq">FAQ</a></li>
         </ul>
       </div>
