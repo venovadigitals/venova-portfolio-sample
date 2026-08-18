@@ -141,6 +141,12 @@ h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(24p
 .highlight-list{list-style:none;margin-top:8px;}
 .highlight-list li{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px 18px;font-size:14.5px;color:var(--navy);position:relative;padding-left:38px;box-shadow:0 2px 12px var(--shadow);margin-bottom:12px;line-height:1.6;}
 .highlight-list li::before{content:'✓';position:absolute;left:14px;top:16px;color:var(--blue);font-weight:700;}
+.process-list{list-style:none;margin-top:8px;counter-reset:step;}
+.process-list li{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px 18px 16px 54px;font-size:14.5px;color:var(--navy);position:relative;box-shadow:0 2px 12px var(--shadow);margin-bottom:12px;line-height:1.6;}
+.process-list li::before{counter-increment:step;content:counter(step);position:absolute;left:14px;top:14px;width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.process-list strong{display:block;font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.result-box{background:#fff;border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:8px;padding:22px 24px;box-shadow:0 2px 12px var(--shadow);}
+.result-box p{font-size:15.5px;line-height:1.7;color:var(--navy);}
 .cta-band{background:linear-gradient(135deg,var(--navy),#12203d);border-radius:16px;padding:44px 36px;text-align:center;color:#fff;}
 .cta-band h2{color:#fff;}
 .cta-band p{color:#b9c6dc;font-size:15.5px;margin-bottom:22px;}
@@ -166,6 +172,7 @@ footer{background:var(--navy);color:#b9c6dc;padding:50px 0 22px;margin-top:20px;
     <li><a href="/#about">About</a></li>
     <li><a href="/#services">Services</a></li>
     <li><a href="/#portfolio">Portfolio</a></li>
+    <li><a href="/blog.html">Blog</a></li>
     <li><a href="/#faq">FAQ</a></li>
     <li><a href="https://wa.me/919390238537" class="nav-cta">Get Free Consultation</a></li>
   </ul>
@@ -211,6 +218,25 @@ footer{background:var(--navy);color:#b9c6dc;padding:50px 0 22px;margin-top:20px;
   </section>
 
   <section>
+    <div class="section-label">Our Process</div>
+    <h2>How We Got There</h2>
+    <ul class="process-list">
+      <li><strong>Story Structuring</strong>Mapped out the narrative arc so the client's identity and offering land within the first few seconds, before a viewer can scroll or click away.</li>
+      <li><strong>Motion Graphics</strong>Added dynamic transitions and on-screen graphics to keep the piece feeling current rather than a static talking-head format.</li>
+      <li><strong>Colour Grading</strong>Applied consistent, professional grading across every scene so cuts from different source clips still feel like one cohesive video.</li>
+      <li><strong>Dual-Format Pacing</strong>Edited with pacing that works both as a standalone video and as a shorter cut for social, so the client gets more use out of a single shoot.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-label">Outcome</div>
+    <h2>The Result</h2>
+    <div class="result-box">
+      <p>The client now has an introduction video that works as hard on a landing page as it does cut down for social — one shoot, two formats, without needing a second edit.</p>
+    </div>
+  </section>
+
+  <section>
     <div class="cta-band">
       <h2>Want Results Like This?</h2>
       <p>Tell us about your project and we'll get back to you with a free quote.</p>
@@ -233,6 +259,7 @@ footer{background:var(--navy);color:#b9c6dc;padding:50px 0 22px;margin-top:20px;
           <li><a href="/#about">About Us</a></li>
           <li><a href="/#services">Services</a></li>
           <li><a href="/#portfolio">Portfolio</a></li>
+          <li><a href="/blog.html">Blog</a></li>
           <li><a href="/#faq">FAQ</a></li>
         </ul>
       </div>
