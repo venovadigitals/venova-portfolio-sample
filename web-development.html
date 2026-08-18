@@ -106,7 +106,46 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:16px 60px;display:f
 .nav-links a:hover{color:var(--blue);}
 .nav-cta{background:var(--blue);color:#fff!important;padding:10px 20px;border-radius:6px;}
 .nav-cta:hover{background:var(--blue-light);}
-@media (max-width:900px){.nav-links{display:none;} nav{padding:14px 20px;}}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;z-index:1000;position:relative;}
+.hamburger span{width:24px;height:2px;background:var(--navy);transition:all .3s;}
+.nav-close-btn{display:none;}
+@media (max-width:900px){
+  .nav-links{display:none;}
+  nav{padding:14px 20px;}
+  .hamburger{display:flex;}
+  .nav-links.open{
+    display:flex!important;flex-direction:column!important;align-items:center!important;
+    justify-content:center!important;gap:0!important;position:fixed!important;
+    top:0!important;left:0!important;right:0!important;bottom:0!important;
+    width:100vw!important;height:100vh!important;background:#ffffff!important;
+    z-index:9990!important;margin:0!important;padding:0!important;
+    list-style:none!important;overflow:hidden!important;
+  }
+  .nav-links.open li{display:block!important;width:100%!important;text-align:center!important;margin:0!important;padding:0!important;}
+  .nav-links.open li a{
+    display:block!important;width:100%!important;padding:20px 0!important;
+    font-family:'Space Grotesk',sans-serif!important;font-size:24px!important;
+    font-weight:700!important;color:var(--navy)!important;text-transform:none!important;
+    letter-spacing:0!important;text-decoration:none!important;background:none!important;
+    border:none!important;box-shadow:none!important;border-radius:0!important;
+  }
+  .nav-links.open li a:hover{color:var(--blue)!important;}
+  .nav-links.open li:last-child{margin-top:16px!important;padding:0 40px!important;}
+  .nav-links.open li:last-child a{
+    display:inline-block!important;width:auto!important;padding:16px 48px!important;
+    color:#fff!important;border-radius:10px!important;font-size:16px!important;
+    font-weight:700!important;letter-spacing:1px!important;text-transform:uppercase!important;
+    background:var(--blue)!important;box-shadow:0 6px 24px rgba(10,110,219,.35)!important;
+  }
+  .nav-close-btn{
+    display:none;position:fixed;top:16px;right:18px;z-index:9995;
+    background:none;border:none;font-size:28px;color:var(--blue);
+    cursor:pointer;line-height:1;padding:4px 8px;
+  }
+  .nav-close-btn.visible{display:block;}
+  .hamburger.active{display:none;}
+  body.nav-open{overflow:hidden;}
+}
 .breadcrumb{font-family:'Space Grotesk',sans-serif;font-size:12px;letter-spacing:.5px;color:var(--white-soft);padding:110px 0 0;}
 .breadcrumb a{color:var(--blue);text-decoration:none;}
 .hero{padding:24px 0 40px;}
@@ -163,13 +202,17 @@ footer{background:var(--navy);color:#b9c6dc;padding:50px 0 22px;margin-top:20px;
 
 <nav>
   <a href="/" class="nav-logo"><img src="https://res.cloudinary.com/drfl8crbx/image/upload/f_auto,q_auto,w_320/v1779977866/Invert_Venova_PNG_-_Copy_bpc6kj.png" width="150" height="48" alt="Venova Digitals logo" loading="eager"></a>
-  <ul class="nav-links">
+  <ul class="nav-links" id="navLinks">
     <li><a href="/#about">About</a></li>
     <li><a href="/#services">Services</a></li>
     <li><a href="/#portfolio">Portfolio</a></li>
     <li><a href="/#faq">FAQ</a></li>
     <li><a href="https://wa.me/919390238537" class="nav-cta">Get Free Consultation</a></li>
   </ul>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <button class="nav-close-btn" id="navCloseBtn" onclick="toggleMenu()" aria-label="Close menu">&#x2715;</button>
 </nav>
 
 <div class="wrap">
@@ -311,5 +354,25 @@ footer{background:var(--navy);color:#b9c6dc;padding:50px 0 22px;margin-top:20px;
   </div>
 </footer>
 
+<script>
+function toggleMenu(){
+  var links=document.getElementById('navLinks');
+  var burger=document.getElementById('hamburger');
+  var closeBtn=document.getElementById('navCloseBtn');
+  var isOpen=links.classList.toggle('open');
+  burger.classList.toggle('active',isOpen);
+  burger.setAttribute('aria-expanded',isOpen);
+  closeBtn.classList.toggle('visible',isOpen);
+  document.body.classList.toggle('nav-open',isOpen);
+}
+document.querySelectorAll('#navLinks a').forEach(function(a){
+  a.addEventListener('click',function(){
+    document.getElementById('navLinks').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('active');
+    document.getElementById('navCloseBtn').classList.remove('visible');
+    document.body.classList.remove('nav-open');
+  });
+});
+</script>
 </body>
 </html>
