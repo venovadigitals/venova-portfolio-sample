@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Venova Admin — Manage Site Content</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#0a0f1e; --navy-mid:#131c30; --card:#161f35; --border:#243252;
+    --blue:#0a6edb; --blue-light:#3b9eff; --red:#e61515;
+    --white:#f4f7fc; --muted:#8b9bb8; --green:#1a9e5c;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--navy);color:var(--white);min-height:100vh;}
+  /* ---------- LOGIN ---------- */
+  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .login-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:40px 36px;width:100%;max-width:380px;}
+  .login-box h1{font-size:22px;margin:0 0 6px;}
+  .login-box p{color:var(--muted);font-size:13px;margin:0 0 24px;}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase;}
+  input,textarea,select{width:100%;background:var(--navy-mid);border:1px solid var(--border);border-radius:8px;color:var(--white);padding:11px 12px;font-size:14px;margin-bottom:16px;font-family:inherit;}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue-light);}
+  textarea{resize:vertical;min-height:70px;}
+  button{cursor:pointer;font-family:inherit;}
+  .btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:14px;font-weight:600;transition:background .15s;}
+  .btn:hover{background:var(--blue-light);}
+  .btn-danger{background:transparent;color:var(--red);border:1px solid var(--red);}
+  .btn-danger:hover{background:rgba(230,21,21,.12);}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+  .btn-ghost:hover{color:var(--white);border-color:var(--blue-light);}
+  .btn-sm{padding:6px 12px;font-size:12px;border-radius:6px;}
+  .err{color:var(--red);font-size:13px;margin:-8px 0 14px;min-height:16px;}
+  /* ---------- APP SHELL ---------- */
+  #app{display:none;}
+  header{background:var(--navy-mid);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  header h1{font-size:17px;margin:0;}
+  header .sub{color:var(--muted);font-size:12px;}
+  .tabs{display:flex;gap:6px;padding:18px 28px 0;max-width:1100px;margin:0 auto;}
+  .tab{padding:10px 18px;border-radius:8px 8px 0 0;background:transparent;border:1px solid transparent;color:var(--muted);font-size:14px;font-weight:600;}
+  .tab.active{background:var(--card);border-color:var(--border);border-bottom-color:var(--card);color:var(--white);}
+  main{max-width:1100px;margin:0 auto;padding:0 28px 60px;}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:0 10px 10px 10px;padding:24px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+  .panel-head h2{margin:0;font-size:16px;}
+  .status{font-size:13px;color:var(--green);min-height:18px;}
+  .status.err{color:var(--red);}
+  /* item list */
+  .item{background:var(--navy-mid);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;}
+  .item img{width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#1a2540;}
+  .item .body{flex:1;min-width:0;}
+  .item .title-row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .item .title-row strong{font-size:15px;}
+  .item .meta{color:var(--muted);font-size:12px;margin-top:2px;}
+  .item .desc{color:#c3cfe4;font-size:13px;margin-top:8px;line-height:1.5;}
+  .item .actions{display:flex;gap:8px;flex-shrink:0;}
+  .item.inactive{opacity:.5;}
+  .badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(59,158,255,.15);color:var(--blue-light);text-transform:uppercase;letter-spacing:.5px;margin-left:8px;}
+  .badge.off{background:rgba(230,21,21,.15);color:var(--red);}
+  /* form modal */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(5,8,16,.7);z-index:50;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:520px;}
+  .modal h3{margin:0 0 18px;font-size:17px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px;}
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+  .checkbox-row input{width:auto;margin:0;}
+  .checkbox-row label{margin:0;text-transform:none;font-size:13px;color:var(--white);}
+  .add-btn{margin-bottom:0;}
+  .empty{color:var(--muted);font-size:13px;padding:30px 0;text-align:center;}
+  .stars-preview{color:#ffb400;letter-spacing:2px;font-size:14px;}
+  @media(max-width:640px){
+    header{padding:14px 16px;} .tabs{padding:14px 16px 0;} main{padding:0 16px 40px;}
+    .row2{grid-template-columns:1fr;} .item{flex-direction:column;}
+    .item img{width:100%;height:140px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Venova Admin</h1>
+    <p>Sign in to manage Featured Projects, Team & Client Reviews.</p>
+    <label for="loginEmail">Email</label>
+    <input type="email" id="loginEmail" autocomplete="username" placeholder="you@venovadigitals.com">
+    <label for="loginPass">Password</label>
+    <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••">
+    <div class="err" id="loginErr"></div>
+    <button class="btn" style="width:100%" id="loginBtn">Sign In</button>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+  <header>
+    <div>
+      <h1>Venova Site Admin</h1>
+      <div class="sub" id="userEmail"></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="logoutBtn">Log out</button>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="projects">Featured Projects</button>
+    <button class="tab" data-tab="team">Team Members</button>
+    <button class="tab" data-tab="testimonials">Client Reviews</button>
+  </div>
+
+  <main>
+    <div class="panel">
+
+      <!-- PROJECTS PANEL -->
+      <div class="panel-body" id="panel-projects">
+        <div class="panel-head">
+          <h2>Featured Projects</h2>
+          <button class="btn btn-sm" onclick="openProjectForm()">+ Add Project</button>
+        </div>
+        <div class="status" id="status-projects"></div>
+        <div id="list-projects"></div>
+      </div>
+
+      <!-- TEAM PANEL -->
+      <div class="panel-body" id="panel-team" style="display:none">
+        <div class="panel-head">
+          <h2>Team Members</h2>
+          <button class="btn btn-sm" onclick="openTeamForm()">+ Add Member</button>
+        </div>
+        <div class="status" id="status-team"></div>
+        <div id="list-team"></div>
+      </div>
+
+      <!-- TESTIMONIALS PANEL -->
+      <div class="panel-body" id="panel-testimonials" style="display:none">
+        <div class="panel-head">
+          <h2>Client Reviews</h2>
+          <button class="btn btn-sm" onclick="openTestimonialForm()">+ Add Review</button>
+        </div>
+        <div class="status" id="status-testimonials"></div>
+        <div id="list-testimonials"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ===================== PROJECT MODAL ===================== -->
+<div class="overlay" id="overlay-project">
+  <div class="modal">
+    <h3 id="projectFormTitle">Add Project</h3>
+    <input type="hidden" id="p_id">
+    <label>Title</label>
+    <input id="p_title" placeholder="Drone Company Website Design">
+    <label>Category</label>
+    <select id="p_category">
+      <option value="web design">Web Design</option>
+      <option value="social media">Social Media</option>
+      <option value="marketing">Marketing</option>
+      <option value="video editing">Video</option>
+      <option value="branding">Branding</option>
+    </select>
+    <label>Description</label>
+    <textarea id="p_description" placeholder="Short one-line project description"></textarea>
+    <label>Thumbnail Image URL (Cloudinary link)</label>
+    <input id="p_thumbnail_url" placeholder="https://res.cloudinary.com/...">
+    <label>Project / Redirect Link</label>
+    <input id="p_project_url" placeholder="https://... or Google Drive link">
+    <div class="row2">
+      <div><label>Sort Order</label><input type="number" id="p_sort_order" value="0"></div>
+      <div class="checkbox-row" style="margin-top:30px;"><input type="checkbox" id="p_is_active" checked><label>Visible on site</label></div>
+    </div>
+    <div class="err" id="p_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('overlay-project')">Cancel</button>
+      <button class="btn" onclick="saveProject()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TEAM MODAL ===================== -->
+<div class="overlay" id="overlay-team">
+  <div class="modal">
+    <h3 id="teamFormTitle">Add Team Member</h3>
+    <input type="hidden" id="t_id">
+    <div class="row2">
+      <div><label>Full Name</label><input id="t_name" placeholder="Sai Venkat"></div>
+      <div><label>Initials (fallback avatar)</label><input id="t_initials" placeholder="SV" maxlength="3"></div>
+    </div>
+    <label>Role / Title</label>
+    <input id="t_role" placeholder="Creative Director">
+    <label>Bio</label>
+    <textarea id="t_bio" placeholder="Short bio shown on the team card"></textarea>
+    <label>Photo URL (Cloudinary link — leave blank to show initials)</label>
+    <input id="t_photo_url" placeholder="https://res.cloudinary.com/...">
+    <div class="row2">
+      <div><label>LinkedIn URL</label><input id="t_linkedin_url" placeholder="https://linkedin.com/in/..."></div>
+      <div><label>Instagram URL</label><input id="t_instagram_url" placeholder="https://instagram.com/..."></div>
+    </div>
+    <div class="row2">
+      <div><label>Sort Order</label><input type="number" id="t_sort_order" value="0"></div>
+      <div class="checkbox-row" style="margin-top:30px;"><input type="checkbox" id="t_is_active" checked><label>Visible on site</label></div>
+    </div>
+    <div class="err" id="t_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('overlay-team')">Cancel</button>
+      <button class="btn" onclick="saveTeam()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TESTIMONIAL MODAL ===================== -->
+<div class="overlay" id="overlay-testimonial">
+  <div class="modal">
+    <h3 id="testimonialFormTitle">Add Client Review</h3>
+    <input type="hidden" id="r_id">
+    <div class="row2">
+      <div><label>Client Name</label><input id="r_author_name" placeholder="K. Sunny"></div>
+      <div><label>Initials</label><input id="r_author_initials" placeholder="KS" maxlength="3"></div>
+    </div>
+    <label>Client Role / Company</label>
+    <input id="r_author_role" placeholder="Managing Director, SAG Pvt Ltd">
+    <label>Review Text</label>
+    <textarea id="r_review_text" placeholder="What the client said..."></textarea>
+    <div class="row2">
+      <div><label>Rating (1–5)</label><input type="number" id="r_rating" value="5" min="1" max="5"></div>
+      <div><label>Sort Order</label><input type="number" id="r_sort_order" value="0"></div>
+    </div>
+    <div class="checkbox-row"><input type="checkbox" id="r_is_active" checked><label>Visible on site</label></div>
+    <div class="err" id="r_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('overlay-testimonial')">Cancel</button>
+      <button class="btn" onclick="saveTestimonial()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   CONFIG — paste your Supabase project credentials here.
+   Supabase Dashboard → Project Settings → API
+   ========================================================= */
+const SUPABASE_URL = 'https://shlcuvhjrmdifrvckqgp.supabase.co';       // e.g. https://xxxxxxxx.supabase.co
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNobGN1dmhqcm1kaWZydmNrcWdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwMzczMTYsImV4cCI6MjEwMjYxMzMxNn0.BxohGyCfTmmZ7jVvrD0fSsM91oeLbSLxneXOHUZYf_o';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ---------------- AUTH ---------------- */
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.textContent = '';
+  if(!email || !password){ errEl.textContent = 'Enter email and password.'; return; }
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  btn.textContent = 'Sign In'; btn.disabled = false;
+  if(error){ errEl.textContent = error.message; return; }
+  showApp(data.user);
+}
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+async function checkSession(){
+  const { data } = await sb.auth.getSession();
+  if(data.session){ showApp(data.session.user); }
+}
+
+function showApp(user){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('userEmail').textContent = user.email;
+  loadProjects(); loadTeam(); loadTestimonials();
+}
+checkSession();
+
+/* ---------------- TABS ---------------- */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel-body').forEach(p=>p.style.display='none');
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).style.display='block';
+  });
+});
+
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function showStatus(key, msg, isErr){
+  const el = document.getElementById('status-'+key);
+  el.textContent = msg; el.className = 'status' + (isErr?' err':'');
+  if(!isErr) setTimeout(()=>{ if(el.textContent===msg) el.textContent=''; }, 2500);
+}
+function esc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* =========================================================
+   PROJECTS
+   ========================================================= */
+async function loadProjects(){
+  const { data, error } = await sb.from('projects').select('*').order('sort_order');
+  const list = document.getElementById('list-projects');
+  if(error){ list.innerHTML = `<div class="empty">Error loading: ${esc(error.message)}</div>`; return; }
+  if(!data.length){ list.innerHTML = '<div class="empty">No projects yet. Click "+ Add Project".</div>'; return; }
+  list.innerHTML = data.map(p => `
+    <div class="item ${p.is_active?'':'inactive'}">
+      <img src="${esc(p.thumbnail_url)||''}" onerror="this.style.visibility='hidden'">
+      <div class="body">
+        <div class="title-row">
+          <strong>${esc(p.title)}<span class="badge ${p.is_active?'':'off'}">${p.category}</span></strong>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" onclick='editProject(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteRow('projects','${p.id}',loadProjects,'projects')">Delete</button>
+          </div>
+        </div>
+        <div class="meta">Order: ${p.sort_order} · ${p.is_active?'Visible':'Hidden'}</div>
+        <div class="desc">${esc(p.description)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function openProjectForm(){
+  document.getElementById('projectFormTitle').textContent = 'Add Project';
+  ['p_id','p_title','p_description','p_thumbnail_url','p_project_url'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p_category').value = 'web design';
+  document.getElementById('p_sort_order').value = 0;
+  document.getElementById('p_is_active').checked = true;
+  document.getElementById('p_err').textContent = '';
+  document.getElementById('overlay-project').classList.add('show');
+}
+function editProject(p){
+  document.getElementById('projectFormTitle').textContent = 'Edit Project';
+  document.getElementById('p_id').value = p.id;
+  document.getElementById('p_title').value = p.title;
+  document.getElementById('p_category').value = p.category;
+  document.getElementById('p_description').value = p.description;
+  document.getElementById('p_thumbnail_url').value = p.thumbnail_url;
+  document.getElementById('p_project_url').value = p.project_url;
+  document.getElementById('p_sort_order').value = p.sort_order;
+  document.getElementById('p_is_active').checked = p.is_active;
+  document.getElementById('p_err').textContent = '';
+  document.getElementById('overlay-project').classList.add('show');
+}
+async function saveProject(){
+  const id = document.getElementById('p_id').value;
+  const row = {
+    title: document.getElementById('p_title').value.trim(),
+    category: document.getElementById('p_category').value,
+    description: document.getElementById('p_description').value.trim(),
+    thumbnail_url: document.getElementById('p_thumbnail_url').value.trim(),
+    project_url: document.getElementById('p_project_url').value.trim() || '#',
+    sort_order: parseInt(document.getElementById('p_sort_order').value)||0,
+    is_active: document.getElementById('p_is_active').checked
+  };
+  if(!row.title){ document.getElementById('p_err').textContent='Title is required.'; return; }
+  const { error } = id ? await sb.from('projects').update(row).eq('id', id)
+                        : await sb.from('projects').insert(row);
+  if(error){ document.getElementById('p_err').textContent = error.message; return; }
+  closeModal('overlay-project'); showStatus('projects','Saved ✓'); loadProjects();
+}
+
+/* =========================================================
+   TEAM
+   ========================================================= */
+async function loadTeam(){
+  const { data, error } = await sb.from('team_members').select('*').order('sort_order');
+  const list = document.getElementById('list-team');
+  if(error){ list.innerHTML = `<div class="empty">Error loading: ${esc(error.message)}</div>`; return; }
+  if(!data.length){ list.innerHTML = '<div class="empty">No team members yet. Click "+ Add Member".</div>'; return; }
+  list.innerHTML = data.map(t => `
+    <div class="item ${t.is_active?'':'inactive'}">
+      <img src="${esc(t.photo_url)||''}" onerror="this.style.visibility='hidden'">
+      <div class="body">
+        <div class="title-row">
+          <strong>${esc(t.name)} <span class="badge ${t.is_active?'':'off'}">${esc(t.role)}</span></strong>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" onclick='editTeam(${JSON.stringify(t).replace(/'/g,"&#39;")})'>Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteRow('team_members','${t.id}',loadTeam,'team')">Delete</button>
+          </div>
+        </div>
+        <div class="meta">Order: ${t.sort_order} · ${t.is_active?'Visible':'Hidden'}</div>
+        <div class="desc">${esc(t.bio)}</div>
+      </div>
+    </div>`).join('');
+}
+function openTeamForm(){
+  document.getElementById('teamFormTitle').textContent = 'Add Team Member';
+  ['t_id','t_name','t_initials','t_role','t_bio','t_photo_url','t_linkedin_url','t_instagram_url'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('t_sort_order').value = 0;
+  document.getElementById('t_is_active').checked = true;
+  document.getElementById('t_err').textContent = '';
+  document.getElementById('overlay-team').classList.add('show');
+}
+function editTeam(t){
+  document.getElementById('teamFormTitle').textContent = 'Edit Team Member';
+  document.getElementById('t_id').value = t.id;
+  document.getElementById('t_name').value = t.name;
+  document.getElementById('t_initials').value = t.initials;
+  document.getElementById('t_role').value = t.role;
+  document.getElementById('t_bio').value = t.bio;
+  document.getElementById('t_photo_url').value = t.photo_url;
+  document.getElementById('t_linkedin_url').value = t.linkedin_url;
+  document.getElementById('t_instagram_url').value = t.instagram_url;
+  document.getElementById('t_sort_order').value = t.sort_order;
+  document.getElementById('t_is_active').checked = t.is_active;
+  document.getElementById('t_err').textContent = '';
+  document.getElementById('overlay-team').classList.add('show');
+}
+async function saveTeam(){
+  const id = document.getElementById('t_id').value;
+  const row = {
+    name: document.getElementById('t_name').value.trim(),
+    initials: document.getElementById('t_initials').value.trim().toUpperCase(),
+    role: document.getElementById('t_role').value.trim(),
+    bio: document.getElementById('t_bio').value.trim(),
+    photo_url: document.getElementById('t_photo_url').value.trim(),
+    linkedin_url: document.getElementById('t_linkedin_url').value.trim(),
+    instagram_url: document.getElementById('t_instagram_url').value.trim(),
+    sort_order: parseInt(document.getElementById('t_sort_order').value)||0,
+    is_active: document.getElementById('t_is_active').checked
+  };
+  if(!row.name){ document.getElementById('t_err').textContent='Name is required.'; return; }
+  const { error } = id ? await sb.from('team_members').update(row).eq('id', id)
+                        : await sb.from('team_members').insert(row);
+  if(error){ document.getElementById('t_err').textContent = error.message; return; }
+  closeModal('overlay-team'); showStatus('team','Saved ✓'); loadTeam();
+}
+
+/* =========================================================
+   TESTIMONIALS
+   ========================================================= */
+async function loadTestimonials(){
+  const { data, error } = await sb.from('testimonials').select('*').order('sort_order');
+  const list = document.getElementById('list-testimonials');
+  if(error){ list.innerHTML = `<div class="empty">Error loading: ${esc(error.message)}</div>`; return; }
+  if(!data.length){ list.innerHTML = '<div class="empty">No reviews yet. Click "+ Add Review".</div>'; return; }
+  list.innerHTML = data.map(r => `
+    <div class="item ${r.is_active?'':'inactive'}">
+      <div class="body">
+        <div class="title-row">
+          <strong>${esc(r.author_name)} <span class="badge ${r.is_active?'':'off'}">★ ${r.rating}</span></strong>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" onclick='editTestimonial(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteRow('testimonials','${r.id}',loadTestimonials,'testimonials')">Delete</button>
+          </div>
+        </div>
+        <div class="meta">${esc(r.author_role)} · Order: ${r.sort_order} · ${r.is_active?'Visible':'Hidden'}</div>
+        <div class="desc">"${esc(r.review_text)}"</div>
+      </div>
+    </div>`).join('');
+}
+function openTestimonialForm(){
+  document.getElementById('testimonialFormTitle').textContent = 'Add Client Review';
+  ['r_id','r_author_name','r_author_initials','r_author_role','r_review_text'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('r_rating').value = 5;
+  document.getElementById('r_sort_order').value = 0;
+  document.getElementById('r_is_active').checked = true;
+  document.getElementById('r_err').textContent = '';
+  document.getElementById('overlay-testimonial').classList.add('show');
+}
+function editTestimonial(r){
+  document.getElementById('testimonialFormTitle').textContent = 'Edit Client Review';
+  document.getElementById('r_id').value = r.id;
+  document.getElementById('r_author_name').value = r.author_name;
+  document.getElementById('r_author_initials').value = r.author_initials;
+  document.getElementById('r_author_role').value = r.author_role;
+  document.getElementById('r_review_text').value = r.review_text;
+  document.getElementById('r_rating').value = r.rating;
+  document.getElementById('r_sort_order').value = r.sort_order;
+  document.getElementById('r_is_active').checked = r.is_active;
+  document.getElementById('r_err').textContent = '';
+  document.getElementById('overlay-testimonial').classList.add('show');
+}
+async function saveTestimonial(){
+  const id = document.getElementById('r_id').value;
+  const row = {
+    author_name: document.getElementById('r_author_name').value.trim(),
+    author_initials: document.getElementById('r_author_initials').value.trim().toUpperCase(),
+    author_role: document.getElementById('r_author_role').value.trim(),
+    review_text: document.getElementById('r_review_text').value.trim(),
+    rating: Math.min(5, Math.max(1, parseInt(document.getElementById('r_rating').value)||5)),
+    sort_order: parseInt(document.getElementById('r_sort_order').value)||0,
+    is_active: document.getElementById('r_is_active').checked
+  };
+  if(!row.author_name || !row.review_text){ document.getElementById('r_err').textContent='Name and review text are required.'; return; }
+  const { error } = id ? await sb.from('testimonials').update(row).eq('id', id)
+                        : await sb.from('testimonials').insert(row);
+  if(error){ document.getElementById('r_err').textContent = error.message; return; }
+  closeModal('overlay-testimonial'); showStatus('testimonials','Saved ✓'); loadTestimonials();
+}
+
+/* ---------------- SHARED DELETE ---------------- */
+async function deleteRow(table, id, reload, statusKey){
+  if(!confirm('Delete this item? This cannot be undone.')) return;
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if(error){ showStatus(statusKey, 'Error: '+error.message, true); return; }
+  showStatus(statusKey, 'Deleted ✓'); reload();
+}
+</script>
+</body>
+</html>
